@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { AreaChart, Area, ResponsiveContainer, Tooltip } from 'recharts';
-import { Flame, Scale, Globe } from 'lucide-react';
+import { Flame, Scale, Globe, Briefcase, Dumbbell, Users, Gamepad2, Book, Film, Heart, Activity } from 'lucide-react';
 import { useMood } from '../context/MoodContext';
-import { MOODS } from '../constants';
+import { MOODS, ACTIVITIES } from '../constants';
 import GlassCard from '../components/GlassCard';
 
 const DashboardScreen: React.FC = () => {
@@ -21,6 +21,19 @@ const DashboardScreen: React.FC = () => {
   
   const dominantColor = MOODS.find(m => m.type === dominantMood)?.color || '#fff';
   const todayDate = new Date().getDate();
+
+  const getIcon = (iconName: string, size = 14) => {
+    switch (iconName) {
+      case 'briefcase': return <Briefcase size={size} />;
+      case 'dumbbell': return <Dumbbell size={size} />;
+      case 'users': return <Users size={size} />;
+      case 'gamepad': return <Gamepad2 size={size} />;
+      case 'book': return <Book size={size} />;
+      case 'film': return <Film size={size} />;
+      case 'heart': return <Heart size={size} />;
+      default: return <Activity size={size} />;
+    }
+  };
 
   return (
     <div className="h-full flex flex-col relative z-10 pb-24 overflow-y-auto">
@@ -151,17 +164,37 @@ const DashboardScreen: React.FC = () => {
                             </div>
 
                             {/* Card */}
-                            <GlassCard className="flex-1 p-4 flex items-center gap-4 hover:bg-white/5 transition-colors cursor-pointer border-white/5 bg-dark-card/40">
-                                <div 
-                                    className="w-10 h-10 rounded-full shrink-0 relative shadow-lg"
-                                    style={{ background: `linear-gradient(135deg, ${moodDef.gradientFrom}, ${moodDef.gradientTo})` }}
-                                >
-                                     <div className="absolute inset-0 bg-white/20 rounded-full blur-[2px]" />
+                            <GlassCard className="flex-1 p-4 flex flex-col gap-3 hover:bg-white/5 transition-colors cursor-pointer border-white/5 bg-dark-card/40">
+                                <div className="flex items-center gap-4">
+                                    <div 
+                                        className="w-10 h-10 rounded-full shrink-0 relative shadow-lg"
+                                        style={{ background: `linear-gradient(135deg, ${moodDef.gradientFrom}, ${moodDef.gradientTo})` }}
+                                    >
+                                        <div className="absolute inset-0 bg-white/20 rounded-full blur-[2px]" />
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <span className="text-white font-semibold text-sm">{moodDef.label}</span>
+                                        <div className="flex items-center gap-2 text-slate-400 text-xs">
+                                             <span>Energy: {entry.energy}%</span>
+                                             <span>•</span>
+                                             <span>Sleep: {entry.sleep}h</span>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div className="flex flex-col">
-                                    <span className="text-white font-semibold text-sm">{moodDef.label}</span>
-                                    <span className="text-slate-400 text-xs">Energy: {entry.energy}% • Sleep: {entry.sleep}h</span>
-                                </div>
+                                {entry.activities && entry.activities.length > 0 && (
+                                    <div className="flex gap-2 pl-14 flex-wrap">
+                                        {entry.activities.map(actId => {
+                                            const activityDef = ACTIVITIES.find(a => a.id === actId);
+                                            if (!activityDef) return null;
+                                            return (
+                                                <div key={actId} className="flex items-center gap-1 bg-white/5 px-2 py-1 rounded-md">
+                                                    {getIcon(activityDef.icon)}
+                                                    <span className="text-[10px] text-white/70">{activityDef.label}</span>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                )}
                             </GlassCard>
                         </div>
                     );

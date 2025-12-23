@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Activity, Moon, Calendar, Check } from 'lucide-react';
-import { MOODS } from '../constants';
+import { 
+  ChevronLeft, ChevronRight, Activity, Moon, Calendar, Check, X,
+  Briefcase, Dumbbell, Users, Gamepad2, Book, Film, Heart
+} from 'lucide-react';
+import { MOODS, ACTIVITIES } from '../constants';
 import { useMood } from '../context/MoodContext';
 import Planet from '../components/Planet';
 import GlassCard from '../components/GlassCard';
@@ -15,8 +18,13 @@ const LoggerScreen: React.FC<LoggerScreenProps> = ({ onLogComplete }) => {
   const [moodIndex, setMoodIndex] = useState(2); // Start at 'Okay'
   const [energy, setEnergy] = useState(75);
   const [sleep, setSleep] = useState(7);
+  const [selectedActivities, setSelectedActivities] = useState<string[]>([]);
+  
   const [isLogging, setIsLogging] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
+
+  // Modals state
+  const [activeModal, setActiveModal] = useState<'none' | 'activity' | 'sleep'>('none');
 
   const currentMood = MOODS[moodIndex];
 
@@ -30,7 +38,6 @@ const LoggerScreen: React.FC<LoggerScreenProps> = ({ onLogComplete }) => {
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.value) {
-      // Create date from string to avoid timezone issues with valueAsDate sometimes
       const [year, month, day] = e.target.value.split('-').map(Number);
       const newDate = new Date(year, month - 1, day);
       setSelectedDate(newDate);
@@ -39,13 +46,12 @@ const LoggerScreen: React.FC<LoggerScreenProps> = ({ onLogComplete }) => {
 
   const handleSave = () => {
     setIsLogging(true);
-    // Simulate API/Storage delay for effect
     setTimeout(() => {
         addEntry({
             mood: currentMood.type,
             energy,
             sleep,
-            activities: [],
+            activities: selectedActivities,
             note: ''
         }, selectedDate.toISOString());
         setIsLogging(false);
@@ -53,7 +59,27 @@ const LoggerScreen: React.FC<LoggerScreenProps> = ({ onLogComplete }) => {
     }, 800);
   };
 
+  const toggleActivity = (id: string) => {
+    setSelectedActivities(prev => 
+      prev.includes(id) ? prev.filter(a => a !== id) : [...prev, id]
+    );
+  };
+
   const isToday = selectedDate.toDateString() === new Date().toDateString();
+
+  // Helper to get icon component
+  const getIcon = (iconName: string, size = 20) => {
+    switch (iconName) {
+      case 'briefcase': return <Briefcase size={size} />;
+      case 'dumbbell': return <Dumbbell size={size} />;
+      case 'users': return <Users size={size} />;
+      case 'gamepad': return <Gamepad2 size={size} />;
+      case 'book': return <Book size={size} />;
+      case 'film': return <Film size={size} />;
+      case 'heart': return <Heart size={size} />;
+      default: return <Activity size={size} />;
+    }
+  };
 
   return (
     <div className="h-full flex flex-col relative z-10 pb-24">
@@ -75,7 +101,6 @@ const LoggerScreen: React.FC<LoggerScreenProps> = ({ onLogComplete }) => {
                 type="date" 
                 className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-20"
                 onChange={handleDateChange}
-                // Format YYYY-MM-DD for value
                 value={selectedDate.toISOString().split('T')[0]}
             />
           </div>
@@ -106,7 +131,7 @@ const LoggerScreen: React.FC<LoggerScreenProps> = ({ onLogComplete }) => {
 
         {/* Inputs */}
         <div className="w-full space-y-4">
-            {/* Energy Slider - Full Width */}
+            {/* Energy Slider */}
             <GlassCard delay={0.1} className="p-6">
                 <div className="flex justify-between items-center mb-4">
                     <span className="text-sm font-medium text-white/80">Energy Level</span>
@@ -126,12 +151,22 @@ const LoggerScreen: React.FC<LoggerScreenProps> = ({ onLogComplete }) => {
 
             {/* 3 Columns: Activity, Sleep, Save */}
             <div className="grid grid-cols-3 gap-3">
-                <GlassCard delay={0.2} className="p-3 flex flex-col items-center justify-center gap-2 hover:bg-white/20 transition-colors group cursor-pointer aspect-square">
+                <GlassCard 
+                    delay={0.2} 
+                    onClick={() => setActiveModal('activity')}
+                    className={`p-3 flex flex-col items-center justify-center gap-2 hover:bg-white/20 transition-colors group cursor-pointer aspect-square ${selectedActivities.length > 0 ? 'bg-white/20 border-white/40' : ''}`}
+                >
                     <Activity className="text-white/80 group-hover:scale-110 transition-transform" size={28} />
-                    <span className="text-xs font-medium">Activity</span>
+                    <span className="text-xs font-medium">
+                        {selectedActivities.length > 0 ? `${selectedActivities.length} Selected` : 'Activity'}
+                    </span>
                 </GlassCard>
 
-                <GlassCard delay={0.3} className="p-3 flex flex-col items-center justify-center gap-2 hover:bg-white/20 transition-colors group cursor-pointer aspect-square">
+                <GlassCard 
+                    delay={0.3} 
+                    onClick={() => setActiveModal('sleep')}
+                    className="p-3 flex flex-col items-center justify-center gap-2 hover:bg-white/20 transition-colors group cursor-pointer aspect-square"
+                >
                     <Moon className="text-white/80 group-hover:scale-110 transition-transform" size={28} />
                     <div className="flex flex-col items-center">
                         <span className="text-xs font-medium">Sleep</span>
@@ -139,7 +174,6 @@ const LoggerScreen: React.FC<LoggerScreenProps> = ({ onLogComplete }) => {
                     </div>
                 </GlassCard>
 
-                {/* Save Button */}
                 <motion.button
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -163,6 +197,80 @@ const LoggerScreen: React.FC<LoggerScreenProps> = ({ onLogComplete }) => {
             </div>
         </div>
       </main>
+
+      {/* Modals / Overlays */}
+      <AnimatePresence>
+        {activeModal !== 'none' && (
+            <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="absolute inset-0 z-50 bg-black/60 backdrop-blur-md flex items-end sm:items-center justify-center p-4"
+                onClick={() => setActiveModal('none')}
+            >
+                <motion.div 
+                    initial={{ y: '100%' }}
+                    animate={{ y: 0 }}
+                    exit={{ y: '100%' }}
+                    onClick={(e) => e.stopPropagation()}
+                    className="w-full max-w-sm bg-[#1a2632] border border-white/10 rounded-3xl p-6 shadow-2xl relative"
+                >
+                    <button 
+                        onClick={() => setActiveModal('none')}
+                        className="absolute right-4 top-4 p-2 bg-white/5 rounded-full hover:bg-white/10"
+                    >
+                        <X size={20} />
+                    </button>
+
+                    {activeModal === 'activity' && (
+                        <>
+                            <h3 className="text-xl font-bold mb-6">What did you do?</h3>
+                            <div className="grid grid-cols-4 gap-4">
+                                {ACTIVITIES.map(act => (
+                                    <button
+                                        key={act.id}
+                                        onClick={() => toggleActivity(act.id)}
+                                        className={`flex flex-col items-center gap-2 p-2 rounded-xl transition-all ${selectedActivities.includes(act.id) ? 'bg-white/20 ring-2 ring-white/50' : 'bg-white/5 hover:bg-white/10'}`}
+                                    >
+                                        <div className={`p-3 rounded-full ${selectedActivities.includes(act.id) ? 'bg-white text-black' : 'bg-black/20 text-white'}`}>
+                                            {getIcon(act.icon, 24)}
+                                        </div>
+                                        <span className="text-[10px] font-medium">{act.label}</span>
+                                    </button>
+                                ))}
+                            </div>
+                        </>
+                    )}
+
+                    {activeModal === 'sleep' && (
+                        <>
+                             <h3 className="text-xl font-bold mb-8 text-center">Hours Slept</h3>
+                             <div className="flex items-center justify-center gap-8 mb-8">
+                                <button 
+                                    onClick={() => setSleep(prev => Math.max(0, prev - 0.5))}
+                                    className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-2xl hover:bg-white/20"
+                                >-</button>
+                                <div className="text-center">
+                                    <span className="text-6xl font-bold">{sleep}</span>
+                                    <span className="text-white/50 block text-sm mt-1">hours</span>
+                                </div>
+                                <button 
+                                    onClick={() => setSleep(prev => Math.min(24, prev + 0.5))}
+                                    className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-2xl hover:bg-white/20"
+                                >+</button>
+                             </div>
+                             <div className="w-full bg-white/10 rounded-full h-2 mb-4">
+                                <div 
+                                    className="bg-white h-full rounded-full transition-all" 
+                                    style={{ width: `${(sleep / 12) * 100}%` }}
+                                />
+                             </div>
+                        </>
+                    )}
+                </motion.div>
+            </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
