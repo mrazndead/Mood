@@ -22,19 +22,6 @@ export const MoodProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       } catch (e) {
         console.error("Failed to parse entries", e);
       }
-    } else {
-        // Seed some fake data for the "demo" feel if empty
-        const fakeData: MoodEntry[] = Array.from({ length: 7 }).map((_, i) => ({
-            id: `seed-${i}`,
-            date: new Date(Date.now() - i * 86400000).toISOString(),
-            timestamp: Date.now() - i * 86400000,
-            mood: i % 2 === 0 ? 'Great' : i % 3 === 0 ? 'Good' : 'Okay',
-            energy: 60 + Math.random() * 30,
-            sleep: 6 + Math.random() * 3,
-            activities: ['work', 'exercise'],
-            note: 'Generated sample entry'
-        }));
-        setEntries(fakeData);
     }
   }, []);
 
@@ -56,8 +43,7 @@ export const MoodProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const getRecentStreak = () => {
     let streak = 0;
-    const now = new Date();
-    // Simplified streak logic for demo
+    // Simplified streak logic
     for (let i = 0; i < entries.length; i++) {
         // In real app, check consecutive days
         streak++;
