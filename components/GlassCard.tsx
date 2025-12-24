@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 interface GlassCardProps {
   children: React.ReactNode;
   className?: string;
-  onClick?: () => void;
+  onClick?: (event: React.MouseEvent<HTMLDivElement>) => void;
   delay?: number;
 }
 

@@ -13,6 +13,12 @@ interface LoggerScreenProps {
   onLogComplete: () => void;
 }
 
+interface Ripple {
+  x: number;
+  y: number;
+  id: number;
+}
+
 const LoggerScreen: React.FC<LoggerScreenProps> = ({ onLogComplete }) => {
   const { addEntry } = useMood();
   const [moodIndex, setMoodIndex] = useState(2); // Start at 'Okay'
@@ -25,6 +31,9 @@ const LoggerScreen: React.FC<LoggerScreenProps> = ({ onLogComplete }) => {
 
   // Modals state
   const [activeModal, setActiveModal] = useState<'none' | 'activity' | 'sleep'>('none');
+
+  // Ripple state
+  const [ripples, setRipples] = useState<Ripple[]>([]);
 
   const currentMood = MOODS[moodIndex];
 
@@ -63,6 +72,21 @@ const LoggerScreen: React.FC<LoggerScreenProps> = ({ onLogComplete }) => {
     setSelectedActivities(prev => 
       prev.includes(id) ? prev.filter(a => a !== id) : [...prev, id]
     );
+  };
+
+  const handleSleepClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    // Calculate ripple position
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const id = Date.now();
+    
+    setRipples(prev => [...prev, { x, y, id }]);
+    setActiveModal('sleep');
+  };
+
+  const removeRipple = (id: number) => {
+    setRipples(prev => prev.filter(r => r.id !== id));
   };
 
   const isToday = selectedDate.toDateString() === new Date().toDateString();
@@ -165,14 +189,38 @@ const LoggerScreen: React.FC<LoggerScreenProps> = ({ onLogComplete }) => {
 
                 <GlassCard 
                     delay={0.3} 
-                    onClick={() => setActiveModal('sleep')}
-                    className="p-3 flex flex-col items-center justify-center gap-2 hover:bg-white/20 transition-colors group cursor-pointer aspect-square"
+                    onClick={handleSleepClick}
+                    className="relative overflow-hidden p-3 flex flex-col items-center justify-center gap-2 hover:bg-white/20 transition-colors group cursor-pointer aspect-square"
                 >
-                    <Moon className="text-white/80 group-hover:scale-110 transition-transform" size={28} />
-                    <div className="flex flex-col items-center">
-                        <span className="text-xs font-medium">Sleep</span>
-                        <span className="text-[10px] text-white/50">{sleep}h</span>
+                    <div className="relative z-10 flex flex-col items-center gap-2">
+                        <Moon className="text-white/80 group-hover:scale-110 transition-transform" size={28} />
+                        <div className="flex flex-col items-center">
+                            <span className="text-xs font-medium">Sleep</span>
+                            <span className="text-[10px] text-white/50">{sleep}h</span>
+                        </div>
                     </div>
+                    {/* Ripple Effect */}
+                    <AnimatePresence>
+                        {ripples.map(r => (
+                            <motion.span
+                                key={r.id}
+                                initial={{ scale: 0, opacity: 0.8 }}
+                                animate={{ scale: 3, opacity: 0 }}
+                                exit={{ opacity: 0 }}
+                                transition={{ duration: 0.8, ease: "easeOut" }}
+                                onAnimationComplete={() => removeRipple(r.id)}
+                                className="absolute bg-white/30 rounded-full pointer-events-none"
+                                style={{
+                                    left: r.x,
+                                    top: r.y,
+                                    width: 100,
+                                    height: 100,
+                                    x: "-50%",
+                                    y: "-50%",
+                                }}
+                            />
+                        ))}
+                    </AnimatePresence>
                 </GlassCard>
 
                 <motion.button
