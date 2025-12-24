@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ChevronLeft, ChevronRight, Activity, Moon, Calendar, Check, X,
-  Briefcase, Dumbbell, Users, Gamepad2, Book, Film, Heart
+  Briefcase, Dumbbell, Users, Gamepad2, Book, Film, Heart, Sparkles
 } from 'lucide-react';
 import { MOODS, ACTIVITIES } from '../constants';
 import { useMood } from '../context/MoodContext';
@@ -77,6 +77,7 @@ const LoggerScreen: React.FC<LoggerScreenProps> = ({ onLogComplete }) => {
       case 'book': return <Book size={size} />;
       case 'film': return <Film size={size} />;
       case 'heart': return <Heart size={size} />;
+      case 'sparkles': return <Sparkles size={size} />;
       default: return <Activity size={size} />;
     }
   };

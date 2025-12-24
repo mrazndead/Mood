@@ -4,6 +4,7 @@ import { MoodEntry } from '../types';
 interface MoodContextType {
   entries: MoodEntry[];
   addEntry: (entry: Omit<MoodEntry, 'id' | 'date' | 'timestamp'>, date?: string) => void;
+  updateEntry: (id: string, updates: Partial<MoodEntry>) => void;
   getRecentStreak: () => number;
   getAverageMoodScore: () => number;
 }
@@ -41,6 +42,12 @@ export const MoodProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setEntries(prev => [newEntry, ...prev]);
   };
 
+  const updateEntry = (id: string, updates: Partial<MoodEntry>) => {
+    setEntries(prev => prev.map(entry => 
+      entry.id === id ? { ...entry, ...updates } : entry
+    ));
+  };
+
   const getRecentStreak = () => {
     let streak = 0;
     // Simplified streak logic
@@ -59,7 +66,7 @@ export const MoodProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   return (
-    <MoodContext.Provider value={{ entries, addEntry, getRecentStreak, getAverageMoodScore }}>
+    <MoodContext.Provider value={{ entries, addEntry, updateEntry, getRecentStreak, getAverageMoodScore }}>
       {children}
     </MoodContext.Provider>
   );

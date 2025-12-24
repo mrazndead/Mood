@@ -1,19 +1,63 @@
 import React, { useState } from 'react';
-import { AreaChart, Area, ResponsiveContainer, Tooltip } from 'recharts';
-import { Flame, Scale, Globe, Briefcase, Dumbbell, Users, Gamepad2, Book, Film, Heart, Activity } from 'lucide-react';
+import { AreaChart, Area, ResponsiveContainer, Tooltip, YAxis } from 'recharts';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  Flame, Scale, Globe, Briefcase, Dumbbell, Users, Gamepad2, Book, Film, Heart, Activity, Sparkles,
+  FileText, X, Check, Edit3, Moon
+} from 'lucide-react';
 import { useMood } from '../context/MoodContext';
 import { MOODS, ACTIVITIES } from '../constants';
+import { MoodEntry } from '../types';
 import GlassCard from '../components/GlassCard';
 
 const DashboardScreen: React.FC = () => {
-  const { entries, getRecentStreak, getAverageMoodScore } = useMood();
+  const { entries, getRecentStreak, getAverageMoodScore, updateEntry } = useMood();
   const [view, setView] = useState<'stream' | 'constellation'>('stream');
+  
+  // Note Modal State
+  const [selectedEntry, setSelectedEntry] = useState<MoodEntry | null>(null);
+  const [noteInput, setNoteInput] = useState('');
 
-  // Prepare data for chart
-  const chartData = entries.slice(0, 7).reverse().map(e => ({
+  const handleOpenEntry = (entry: MoodEntry) => {
+    setSelectedEntry(entry);
+    setNoteInput(entry.note || '');
+  };
+
+  const handleSaveNote = () => {
+    if (selectedEntry) {
+      updateEntry(selectedEntry.id, { note: noteInput });
+      setSelectedEntry(null);
+    }
+  };
+
+  // Prepare data for charts
+  const recentEntries = entries.slice(0, 7).reverse();
+  
+  const chartData = recentEntries.map(e => ({
     name: new Date(e.date).toLocaleDateString('en-US', { weekday: 'short' }),
     value: MOODS.findIndex(m => m.type === e.mood) * 20 + 20, // Map mood to 0-100 roughly
   }));
+
+  const sleepData = recentEntries.map(e => ({
+    name: new Date(e.date).toLocaleDateString('en-US', { weekday: 'short' }),
+    value: e.sleep,
+  }));
+
+  // Calculate Sleep Stats
+  const avgSleep = recentEntries.length > 0 
+    ? recentEntries.reduce((acc, curr) => acc + curr.sleep, 0) / recentEntries.length 
+    : 0;
+
+  let sleepRating = { label: '--', color: 'text-slate-400', bg: 'bg-slate-400/10' };
+  if (recentEntries.length > 0) {
+      if (avgSleep < 6) {
+          sleepRating = { label: 'Bad', color: 'text-red-400', bg: 'bg-red-400/10' };
+      } else if (avgSleep < 7.5) {
+          sleepRating = { label: 'Good', color: 'text-blue-300', bg: 'bg-blue-400/10' };
+      } else {
+          sleepRating = { label: 'Great', color: 'text-emerald-400', bg: 'bg-emerald-400/10' };
+      }
+  }
 
   const dominantMood = entries.length > 0 
     ? entries[0].mood 
@@ -31,6 +75,7 @@ const DashboardScreen: React.FC = () => {
       case 'book': return <Book size={size} />;
       case 'film': return <Film size={size} />;
       case 'heart': return <Heart size={size} />;
+      case 'sparkles': return <Sparkles size={size} />;
       default: return <Activity size={size} />;
     }
   };
@@ -111,8 +156,9 @@ const DashboardScreen: React.FC = () => {
       </div>
 
       {view === 'constellation' ? (
-        <div className="px-6 py-4 h-64 w-full">
-            <GlassCard className="h-full w-full p-4 flex flex-col">
+        <div className="px-6 py-4 w-full space-y-4">
+            {/* Mood Chart */}
+            <GlassCard className="h-64 w-full p-4 flex flex-col">
                 <h3 className="text-sm font-medium text-slate-400 mb-4">Mood Constellation (7 Days)</h3>
                 <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={chartData}>
@@ -137,6 +183,51 @@ const DashboardScreen: React.FC = () => {
                     </AreaChart>
                 </ResponsiveContainer>
             </GlassCard>
+
+             {/* Sleep Chart */}
+            <GlassCard className="h-64 w-full p-4 flex flex-col">
+                <div className="flex justify-between items-start mb-2">
+                    <div className="flex items-center gap-2">
+                         <div className="p-1.5 rounded-md bg-cyan-500/20">
+                             <Moon size={14} className="text-cyan-400" />
+                         </div>
+                         <h3 className="text-sm font-medium text-slate-300">Sleep Rhythm</h3>
+                    </div>
+                    
+                    {/* Sleep Rating Badge */}
+                    <div className={`flex flex-col items-end`}>
+                         <div className={`px-2 py-0.5 rounded-full ${sleepRating.bg} border border-white/5`}>
+                             <span className={`text-xs font-bold ${sleepRating.color}`}>{sleepRating.label}</span>
+                         </div>
+                         <span className="text-[10px] text-slate-500 mt-1">Avg: {avgSleep.toFixed(1)}h</span>
+                    </div>
+                </div>
+
+                <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={sleepData}>
+                        <defs>
+                            <linearGradient id="colorSleep" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#22D3EE" stopOpacity={0.8}/>
+                            <stop offset="95%" stopColor="#22D3EE" stopOpacity={0}/>
+                            </linearGradient>
+                        </defs>
+                        <Tooltip 
+                            contentStyle={{ backgroundColor: '#1a2632', border: 'none', borderRadius: '8px' }}
+                            itemStyle={{ color: '#fff' }}
+                            formatter={(value) => [`${value}h`, 'Sleep']}
+                        />
+                        <YAxis hide domain={[0, 12]} />
+                        <Area 
+                            type="monotone" 
+                            dataKey="value" 
+                            stroke="#22D3EE" 
+                            strokeWidth={3}
+                            fillOpacity={1} 
+                            fill="url(#colorSleep)" 
+                        />
+                    </AreaChart>
+                </ResponsiveContainer>
+            </GlassCard>
         </div>
       ) : (
         /* Timeline View */
@@ -149,7 +240,7 @@ const DashboardScreen: React.FC = () => {
                     const isToday = new Date(entry.date).toDateString() === new Date().toDateString();
                     
                     return (
-                        <div key={entry.id} className="relative flex items-center">
+                        <div key={entry.id} className="relative flex items-center group">
                             {/* Dot on timeline */}
                             <div className={`absolute -left-[3px] w-[8px] h-[8px] rounded-full border-2 border-dark-bg z-10 ${isToday ? 'bg-white w-[12px] h-[12px] -left-[5px] shadow-[0_0_10px_white]' : 'bg-slate-600'}`}></div>
                             
@@ -164,7 +255,10 @@ const DashboardScreen: React.FC = () => {
                             </div>
 
                             {/* Card */}
-                            <GlassCard className="flex-1 p-4 flex flex-col gap-3 hover:bg-white/5 transition-colors cursor-pointer border-white/5 bg-dark-card/40">
+                            <GlassCard 
+                                onClick={() => handleOpenEntry(entry)}
+                                className="flex-1 p-4 flex flex-col gap-3 hover:bg-white/10 active:scale-98 transition-all cursor-pointer border-white/5 bg-dark-card/40 relative overflow-hidden"
+                            >
                                 <div className="flex items-center gap-4">
                                     <div 
                                         className="w-10 h-10 rounded-full shrink-0 relative shadow-lg"
@@ -179,6 +273,11 @@ const DashboardScreen: React.FC = () => {
                                              <span>•</span>
                                              <span>Sleep: {entry.sleep}h</span>
                                         </div>
+                                    </div>
+                                    
+                                    {/* Edit Hint Icon (Visible on Hover/Always subtle) */}
+                                    <div className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <Edit3 size={16} className="text-white/40" />
                                     </div>
                                 </div>
                                 {entry.activities && entry.activities.length > 0 && (
@@ -195,6 +294,14 @@ const DashboardScreen: React.FC = () => {
                                         })}
                                     </div>
                                 )}
+                                
+                                {/* Note Preview */}
+                                {entry.note && (
+                                    <div className="mt-2 pl-14 flex items-start gap-2">
+                                        <FileText size={12} className="text-white/40 mt-[2px] shrink-0" />
+                                        <p className="text-xs text-white/60 italic line-clamp-2">"{entry.note}"</p>
+                                    </div>
+                                )}
                             </GlassCard>
                         </div>
                     );
@@ -202,6 +309,85 @@ const DashboardScreen: React.FC = () => {
              </div>
         </div>
       )}
+
+      {/* Note Edit Modal */}
+      <AnimatePresence>
+        {selectedEntry && (
+            <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
+                onClick={() => setSelectedEntry(null)}
+            >
+                <motion.div 
+                    initial={{ scale: 0.9, y: 20, opacity: 0 }}
+                    animate={{ scale: 1, y: 0, opacity: 1 }}
+                    exit={{ scale: 0.9, y: 20, opacity: 0 }}
+                    onClick={e => e.stopPropagation()}
+                    className="w-full max-w-sm bg-[#1a2632] border border-white/10 rounded-3xl p-6 shadow-2xl overflow-hidden relative"
+                >
+                    {/* Background blob for style */}
+                    <div className="absolute top-[-50px] right-[-50px] w-32 h-32 bg-purple-500/20 rounded-full blur-3xl pointer-events-none" />
+
+                    {/* Header */}
+                    <div className="flex justify-between items-center mb-6">
+                        <div>
+                            <h3 className="text-xl font-bold text-white">Journal</h3>
+                            <p className="text-white/50 text-xs">
+                                {new Date(selectedEntry.date).toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                            </p>
+                        </div>
+                        <button 
+                            onClick={() => setSelectedEntry(null)}
+                            className="p-2 bg-white/5 hover:bg-white/10 rounded-full transition-colors"
+                        >
+                            <X size={20} className="text-white/70" />
+                        </button>
+                    </div>
+
+                    {/* Mood Context */}
+                    <div className="flex items-center gap-3 mb-6 p-3 bg-white/5 rounded-2xl border border-white/5">
+                        <div 
+                            className="w-10 h-10 rounded-full shadow-lg"
+                            style={{ 
+                                background: MOODS.find(m => m.type === selectedEntry.mood)?.color || '#fff' 
+                            }}
+                        />
+                        <div>
+                            <p className="font-semibold text-sm">
+                                Feeling {MOODS.find(m => m.type === selectedEntry.mood)?.label}
+                            </p>
+                            <p className="text-xs text-white/50">
+                                Energy: {selectedEntry.energy}% • Sleep: {selectedEntry.sleep}h
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* Note Input */}
+                    <div className="mb-6 relative">
+                        <textarea
+                            value={noteInput}
+                            onChange={(e) => setNoteInput(e.target.value)}
+                            placeholder="Write your thoughts here..."
+                            className="w-full h-40 bg-black/20 border border-white/10 rounded-xl p-4 text-sm text-white placeholder-white/30 focus:outline-none focus:ring-1 focus:ring-purple-500/50 resize-none"
+                        />
+                        <FileText className="absolute bottom-4 right-4 text-white/10 pointer-events-none" size={48} />
+                    </div>
+
+                    {/* Save Button */}
+                    <button
+                        onClick={handleSaveNote}
+                        className="w-full py-3 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl font-bold text-sm shadow-lg shadow-purple-900/20 hover:shadow-purple-900/40 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                    >
+                        <Check size={18} />
+                        Save Note
+                    </button>
+
+                </motion.div>
+            </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

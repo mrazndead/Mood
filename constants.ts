@@ -61,4 +61,5 @@ export const ACTIVITIES: ActivityTag[] = [
   { id: 'reading', label: 'Reading', icon: 'book' },
   { id: 'movies', label: 'Movies', icon: 'film' },
   { id: 'date', label: 'Date', icon: 'heart' },
+  { id: 'intimacy', label: 'Intimacy', icon: 'sparkles' },
 ];
