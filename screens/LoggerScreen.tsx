@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -6,7 +8,6 @@ import {
 import { MOODS, ACTIVITIES } from '../constants';
 import { useMood } from '../context/MoodContext';
 import Planet from '../components/Planet';
-import GlassCard from '../components/GlassCard';
 
 interface LoggerScreenProps {
   onLogComplete: () => void;
@@ -146,26 +147,35 @@ const LoggerScreen: React.FC<LoggerScreenProps> = ({ onLogComplete }) => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="absolute inset-0 z-50 bg-black/40 backdrop-blur-xl flex items-end justify-center"
+                className="absolute inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-6"
                 onClick={() => setActiveModal('none')}
             >
                 <motion.div 
-                    initial={{ y: "100%" }}
-                    animate={{ y: 0 }}
-                    exit={{ y: "100%" }}
-                    transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                    initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                    animate={{ scale: 1, opacity: 1, y: 0 }}
+                    exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                    transition={{ type: 'spring', damping: 25, stiffness: 300 }}
                     onClick={(e) => e.stopPropagation()}
-                    className="w-full bg-[#1a2632] rounded-t-[40px] p-8 pb-12 shadow-2xl"
+                    className="w-full max-w-sm bg-[#1a2632] rounded-[32px] p-8 shadow-2xl border border-white/10 relative"
                 >
-                    <div className="w-12 h-1.5 bg-white/10 mx-auto rounded-full mb-8" />
+                    <button 
+                        onClick={() => setActiveModal('none')}
+                        className="absolute top-4 right-4 p-2 text-white/40 hover:text-white transition-colors"
+                    >
+                        <X size={20} />
+                    </button>
+
+                    <h3 className="text-xl font-bold text-white mb-6 text-center">
+                        {activeModal === 'activity' ? 'What did you do?' : 'How much sleep?'}
+                    </h3>
                     
                     {activeModal === 'activity' && (
-                        <div className="grid grid-cols-4 gap-4">
+                        <div className="grid grid-cols-2 gap-3">
                             {ACTIVITIES.map(act => (
                                 <button
                                     key={act.id}
                                     onClick={() => setSelectedActivities(prev => prev.includes(act.id) ? prev.filter(a => a !== act.id) : [...prev, act.id])}
-                                    className={`flex flex-col items-center gap-2 p-3 rounded-2xl transition-all ${selectedActivities.includes(act.id) ? 'bg-white text-black' : 'bg-white/5 text-white'}`}
+                                    className={`flex items-center justify-center gap-2 p-4 rounded-2xl transition-all border ${selectedActivities.includes(act.id) ? 'bg-white text-black border-white' : 'bg-white/5 text-white border-white/5 hover:bg-white/10'}`}
                                 >
                                     <span className="text-xs font-bold">{act.label}</span>
                                 </button>
@@ -174,15 +184,30 @@ const LoggerScreen: React.FC<LoggerScreenProps> = ({ onLogComplete }) => {
                     )}
 
                     {activeModal === 'sleep' && (
-                        <div className="flex flex-col items-center">
-                            <span className="text-5xl font-black text-white mb-4">{sleep}h</span>
+                        <div className="flex flex-col items-center py-4">
+                            <div className="relative mb-8">
+                                <span className="text-6xl font-black text-white">{sleep}</span>
+                                <span className="text-xl font-bold text-white/40 ml-1">h</span>
+                            </div>
                             <input 
                                 type="range" min="0" max="12" step="0.5" value={sleep} 
                                 onChange={(e) => setSleep(parseFloat(e.target.value))}
                                 className="w-full h-2 bg-white/10 rounded-full appearance-none cursor-pointer accent-white"
                             />
+                            <div className="w-full flex justify-between mt-4 text-[10px] font-bold text-white/30 uppercase tracking-widest">
+                                <span>0h</span>
+                                <span>6h</span>
+                                <span>12h</span>
+                            </div>
                         </div>
                     )}
+
+                    <button 
+                        onClick={() => setActiveModal('none')}
+                        className="w-full mt-8 py-4 bg-white/10 hover:bg-white/20 text-white rounded-2xl font-bold text-sm transition-all"
+                    >
+                        Done
+                    </button>
                 </motion.div>
             </motion.div>
         )}
