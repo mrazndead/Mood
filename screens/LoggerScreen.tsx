@@ -107,7 +107,7 @@ const LoggerScreen: React.FC<LoggerScreenProps> = ({ onLogComplete }) => {
             </button>
         </div>
 
-        {/* Quick Actions - Moved up another 10px (total 20px) */}
+        {/* Quick Actions */}
         <div className="w-full grid grid-cols-3 gap-4 mb-5">
             <button 
                 onClick={() => setActiveModal('activity')}
@@ -126,10 +126,10 @@ const LoggerScreen: React.FC<LoggerScreenProps> = ({ onLogComplete }) => {
             <button 
                 onClick={handleSave}
                 disabled={isLogging}
-                className="flex flex-col items-center gap-2 p-4 rounded-3xl bg-white text-black hover:bg-white/90 transition-all shadow-xl"
+                className="flex flex-col items-center gap-2 p-4 rounded-3xl bg-white/10 hover:bg-white/20 transition-all text-white border border-white/10"
             >
                 {isLogging ? (
-                    <div className="w-6 h-6 border-2 border-black/20 border-t-black rounded-full animate-spin" />
+                    <div className="w-6 h-6 border-2 border-white/20 border-t-white rounded-full animate-spin" />
                 ) : (
                     <>
                         <Check size={24} />

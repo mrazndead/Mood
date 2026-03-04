@@ -9,7 +9,7 @@ interface NavigationProps {
 
 const Navigation: React.FC<NavigationProps> = ({ currentScreen, setScreen, onLogPress }) => {
   return (
-    <nav className="fixed bottom-[20px] left-0 right-0 z-50 p-6">
+    <nav className="fixed bottom-[25px] left-0 right-0 z-50 p-6">
       <div className="max-w-md mx-auto bg-black/20 backdrop-blur-2xl border border-white/10 rounded-[32px] px-8 py-4 flex justify-between items-center shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
         
         <button 
