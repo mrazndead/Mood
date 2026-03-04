@@ -5,11 +5,11 @@ export const MOODS: MoodDefinition[] = [
     type: 'Great',
     label: 'Happy :)',
     emoji: '🤩',
-    color: '#E91E63',
-    gradientFrom: '#F06292',
-    gradientTo: '#E91E63',
-    shadowColor: 'rgba(233, 30, 99, 0.4)',
-    planetColor: '#F48FB1',
+    color: '#3B82F6', // Blue
+    gradientFrom: '#60A5FA',
+    gradientTo: '#3B82F6',
+    shadowColor: 'rgba(59, 130, 246, 0.4)',
+    planetColor: '#93C5FD',
   },
   {
     type: 'Good',
@@ -35,11 +35,11 @@ export const MOODS: MoodDefinition[] = [
     type: 'Low',
     label: 'Just sad',
     emoji: '😔',
-    color: '#2196F3',
-    gradientFrom: '#64B5F6',
-    gradientTo: '#2196F3',
-    shadowColor: 'rgba(33, 150, 243, 0.4)',
-    planetColor: '#90CAF9',
+    color: '#8B5CF6', // Purple
+    gradientFrom: '#A78BFA',
+    gradientTo: '#8B5CF6',
+    shadowColor: 'rgba(139, 92, 246, 0.4)',
+    planetColor: '#C4B5FD',
   },
   {
     type: 'Bad',
@@ -50,6 +50,16 @@ export const MOODS: MoodDefinition[] = [
     gradientTo: '#37474F',
     shadowColor: 'rgba(55, 71, 79, 0.4)',
     planetColor: '#B0BEC5',
+  },
+  {
+    type: 'Angry',
+    label: 'Angry ;[',
+    emoji: '😡',
+    color: '#EF4444', // Red
+    gradientFrom: '#F87171',
+    gradientTo: '#EF4444',
+    shadowColor: 'rgba(239, 68, 68, 0.4)',
+    planetColor: '#FCA5A5',
   },
 ];
 

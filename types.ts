@@ -1,4 +1,4 @@
-export type MoodType = 'Great' | 'Good' | 'Okay' | 'Low' | 'Bad';
+export type MoodType = 'Great' | 'Good' | 'Okay' | 'Low' | 'Bad' | 'Angry';
 
 export interface MoodDefinition {
   type: MoodType;
