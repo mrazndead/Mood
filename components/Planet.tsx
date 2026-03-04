@@ -31,7 +31,7 @@ const Planet: React.FC<PlanetProps> = ({ mood, isAnimating = true }) => {
       <motion.div
         className="absolute w-[115%] h-[115%] pointer-events-none z-20"
         animate={{ rotate: 360 }}
-        transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
+        transition={{ duration: 80, repeat: Infinity, ease: "linear" }}
       >
         <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2">
           <motion.div
