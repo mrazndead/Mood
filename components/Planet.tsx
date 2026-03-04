@@ -18,50 +18,54 @@ const Planet: React.FC<PlanetProps> = ({ mood, isAnimating = true }) => {
   };
 
   return (
-    <div className="relative w-64 h-64 flex items-center justify-center">
-      {/* Orbit Rings */}
-      <div className="absolute inset-[-40px] border border-white/5 rounded-full animate-[spin_60s_linear_infinite]" />
-      <div className="absolute inset-[-20px] border border-white/10 rounded-full animate-[spin_40s_linear_infinite_reverse]" />
-      
+    <div className="relative w-72 h-72 flex items-center justify-center">
       {/* Glow Behind */}
       <motion.div 
-        className="absolute inset-0 rounded-full blur-[50px] opacity-60"
+        className="absolute inset-4 rounded-full blur-[60px] opacity-40"
         animate={{ backgroundColor: mood.planetColor }}
-        transition={{ duration: 1 }}
+        transition={{ duration: 0.8 }}
       />
 
       {/* The Planet Body */}
       <motion.div
-        className="w-full h-full rounded-full relative overflow-hidden shadow-[inset_-20px_-20px_50px_rgba(0,0,0,0.3)] cursor-pointer"
+        className="w-full h-full rounded-full relative overflow-hidden shadow-[inset_-25px_-25px_60px_rgba(0,0,0,0.2),0_20px_40px_rgba(0,0,0,0.15)] cursor-pointer"
         animate={{ 
             backgroundColor: mood.planetColor,
-            y: isAnimating ? [0, -15, 0] : 0
+            y: isAnimating ? [0, -12, 0] : 0
         }}
         transition={{ 
-            backgroundColor: { duration: 0.8 },
-            y: { repeat: Infinity, duration: 6, ease: "easeInOut" }
+            backgroundColor: { duration: 0.6 },
+            y: { repeat: Infinity, duration: 5, ease: "easeInOut" }
         }}
         onPointerDown={handlePointerDown}
-        whileTap={{ scale: 0.98 }}
+        whileTap={{ scale: 0.97 }}
       >
-        {/* Texture/Craters */}
-        <div className="absolute w-16 h-16 bg-black/10 rounded-full top-8 left-10 blur-sm pointer-events-none" />
-        <div className="absolute w-8 h-8 bg-black/10 rounded-full top-32 left-8 blur-sm pointer-events-none" />
-        <div className="absolute w-20 h-20 bg-black/5 rounded-full bottom-8 right-12 blur-sm pointer-events-none" />
+        {/* Texture/Craters - Dynamic based on mood type */}
+        <div className="absolute inset-0 opacity-30">
+            <div className="absolute w-20 h-20 bg-black/10 rounded-full top-10 left-12 blur-[2px]" />
+            <div className="absolute w-12 h-12 bg-black/10 rounded-full top-36 left-6 blur-[1px]" />
+            <div className="absolute w-24 h-24 bg-black/5 rounded-full bottom-10 right-10 blur-[3px]" />
+            <div className="absolute w-8 h-8 bg-white/20 rounded-full top-20 right-20 blur-[1px]" />
+            
+            {/* Swirl patterns for some moods */}
+            {['Great', 'Okay', 'Low'].includes(mood.type) && (
+                <div className="absolute inset-0 border-[15px] border-white/10 rounded-full scale-110 -translate-x-10 translate-y-10 blur-sm" />
+            )}
+        </div>
         
         {/* Ripples */}
         <AnimatePresence>
             {ripples.map(r => (
                 <motion.div
                     key={r.id}
-                    initial={{ opacity: 0.5, scale: 0 }}
-                    animate={{ opacity: 0, scale: 3 }}
+                    initial={{ opacity: 0.4, scale: 0 }}
+                    animate={{ opacity: 0, scale: 2.5 }}
                     exit={{ opacity: 0 }}
-                    transition={{ duration: 1.5, ease: "easeOut" }}
-                    className="absolute rounded-full bg-white/20 border border-white/30 pointer-events-none"
+                    transition={{ duration: 1.2, ease: "easeOut" }}
+                    className="absolute rounded-full bg-white/30 border border-white/40 pointer-events-none"
                     style={{
-                        width: 100,
-                        height: 100,
+                        width: 120,
+                        height: 120,
                         left: r.x,
                         top: r.y,
                         x: "-50%",
@@ -72,22 +76,18 @@ const Planet: React.FC<PlanetProps> = ({ mood, isAnimating = true }) => {
             ))}
         </AnimatePresence>
 
-        {/* Shine */}
-        <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-white/30 rounded-full pointer-events-none" />
+        {/* Shine/Atmosphere */}
+        <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-white/25 rounded-full pointer-events-none" />
       </motion.div>
 
-      {/* Emoji Face Wrapper (maintained for structure) */}
-      <AnimatePresence mode='wait'>
-        <motion.div
-            key={mood.type}
-            initial={{ opacity: 0, scale: 0.5 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.5 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-            className="absolute z-10 text-6xl drop-shadow-lg pointer-events-none"
-        >
-        </motion.div>
-      </AnimatePresence>
+      {/* Rings for specific moods like in the design */}
+      {mood.type === 'Okay' && (
+        <motion.div 
+            initial={{ opacity: 0, rotate: -20, scale: 0.8 }}
+            animate={{ opacity: 1, rotate: -20, scale: 1.1 }}
+            className="absolute w-[120%] h-12 border-[10px] border-white/20 rounded-[100%] pointer-events-none blur-[1px]"
+        />
+      )}
     </div>
   );
 };
