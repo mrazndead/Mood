@@ -3,7 +3,7 @@ import { AreaChart, Area, ResponsiveContainer, Tooltip, YAxis } from 'recharts';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Flame, Scale, Globe, Briefcase, Dumbbell, Users, Gamepad2, Book, Film, Heart, Activity, Sparkles,
-  FileText, X, Check, Edit3, Moon
+  FileText, X, Check, Edit3, Moon, Settings, Trash2, Calendar
 } from 'lucide-react';
 import { useMood } from '../context/MoodContext';
 import { MOODS, ACTIVITIES } from '../constants';
@@ -11,12 +11,17 @@ import { MoodEntry } from '../types';
 import GlassCard from '../components/GlassCard';
 
 const DashboardScreen: React.FC = () => {
-  const { entries, getRecentStreak, getAverageMoodScore, updateEntry } = useMood();
+  const { entries, getRecentStreak, getAverageMoodScore, updateEntry, deleteEntries, clearAllEntries } = useMood();
   const [view, setView] = useState<'stream' | 'constellation'>('stream');
   
-  // Note Modal State
+  // Modal States
   const [selectedEntry, setSelectedEntry] = useState<MoodEntry | null>(null);
   const [noteInput, setNoteInput] = useState('');
+  const [showSettings, setShowSettings] = useState(false);
+  
+  // Date Range State
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
 
   const handleOpenEntry = (entry: MoodEntry) => {
     setSelectedEntry(entry);
@@ -30,12 +35,23 @@ const DashboardScreen: React.FC = () => {
     }
   };
 
+  const handleDeleteRange = () => {
+    if (!startDate || !endDate) {
+      alert('Please select both start and end dates.');
+      return;
+    }
+    if (window.confirm(`Delete all entries between ${startDate} and ${endDate}?`)) {
+      deleteEntries(startDate, endDate);
+      setShowSettings(false);
+    }
+  };
+
   // Prepare data for charts
-  const recentEntries = entries.slice(0, 7).reverse();
+  const recentEntries = [...entries].slice(0, 7).reverse();
   
   const chartData = recentEntries.map(e => ({
     name: new Date(e.date).toLocaleDateString('en-US', { weekday: 'short' }),
-    value: MOODS.findIndex(m => m.type === e.mood) * 20 + 20, // Map mood to 0-100 roughly
+    value: MOODS.findIndex(m => m.type === e.mood) * 20 + 20,
   }));
 
   const sleepData = recentEntries.map(e => ({
@@ -43,7 +59,6 @@ const DashboardScreen: React.FC = () => {
     value: e.sleep,
   }));
 
-  // Calculate Sleep Stats
   const avgSleep = recentEntries.length > 0 
     ? recentEntries.reduce((acc, curr) => acc + curr.sleep, 0) / recentEntries.length 
     : 0;
@@ -89,11 +104,19 @@ const DashboardScreen: React.FC = () => {
       <header className="flex items-center p-6 pb-2 justify-between relative z-50">
         <h1 className="text-white text-lg font-bold tracking-tight">Your Orbit</h1>
         
-        <button className="text-white/70 p-2 rounded-full hover:bg-white/5">
-           <div className="w-6 h-6 border-2 border-white/70 rounded-md flex items-center justify-center text-[10px] font-bold">
-             {todayDate}
-           </div>
-        </button>
+        <div className="flex items-center gap-2">
+          <button 
+            onClick={() => setShowSettings(true)}
+            className="text-white/70 p-2 rounded-full hover:bg-white/5 transition-colors"
+          >
+            <Settings size={20} />
+          </button>
+          <button className="text-white/70 p-2 rounded-full hover:bg-white/5">
+             <div className="w-6 h-6 border-2 border-white/70 rounded-md flex items-center justify-center text-[10px] font-bold">
+               {todayDate}
+             </div>
+          </button>
+        </div>
       </header>
 
       {/* Toggle */}
@@ -117,11 +140,14 @@ const DashboardScreen: React.FC = () => {
       {/* Summary */}
       <div className="px-6 pb-2 pt-2">
         <h2 className="text-white text-[28px] font-bold leading-tight mb-6">
-            You felt mostly <span style={{ color: dominantColor }}>{dominantMood}</span> this week.
+            {entries.length > 0 ? (
+              <>You felt mostly <span style={{ color: dominantColor }}>{dominantMood}</span> this week.</>
+            ) : (
+              <>Start tracking your <span className="text-purple-400">orbit</span> today.</>
+            )}
         </h2>
         
         <div className="grid grid-cols-2 gap-3">
-            {/* Streak */}
             <GlassCard className="p-4 h-32 flex flex-col justify-between bg-dark-card/50 relative overflow-hidden">
                 <div className="absolute top-0 right-0 p-3 opacity-20"><Flame size={32}/></div>
                 <p className="text-slate-400 text-sm font-medium relative z-10">Streak</p>
@@ -131,7 +157,6 @@ const DashboardScreen: React.FC = () => {
                 </div>
             </GlassCard>
 
-            {/* Stability */}
             <GlassCard className="p-4 h-32 flex flex-col justify-between bg-dark-card/50 relative overflow-hidden">
                  <div className="absolute top-0 right-0 p-3 opacity-20"><Scale size={32}/></div>
                 <p className="text-slate-400 text-sm font-medium relative z-10">Stability</p>
@@ -141,7 +166,6 @@ const DashboardScreen: React.FC = () => {
                 </div>
             </GlassCard>
 
-             {/* Dominant */}
              <GlassCard className="col-span-2 p-4 h-24 flex items-center justify-between bg-dark-card/50 relative overflow-hidden">
                  <div className="absolute -right-2 -top-2 p-3 opacity-10"><Globe size={64}/></div>
                  <div className="relative z-10">
@@ -157,7 +181,6 @@ const DashboardScreen: React.FC = () => {
 
       {view === 'constellation' ? (
         <div className="px-6 py-4 w-full space-y-4">
-            {/* Mood Chart */}
             <GlassCard className="h-64 w-full p-4 flex flex-col">
                 <h3 className="text-sm font-medium text-slate-400 mb-4">Mood Constellation (7 Days)</h3>
                 <ResponsiveContainer width="100%" height="100%">
@@ -184,7 +207,6 @@ const DashboardScreen: React.FC = () => {
                 </ResponsiveContainer>
             </GlassCard>
 
-             {/* Sleep Chart */}
             <GlassCard className="h-64 w-full p-4 flex flex-col">
                 <div className="flex justify-between items-start mb-2">
                     <div className="flex items-center gap-2">
@@ -193,8 +215,6 @@ const DashboardScreen: React.FC = () => {
                          </div>
                          <h3 className="text-sm font-medium text-slate-300">Sleep Rhythm</h3>
                     </div>
-                    
-                    {/* Sleep Rating Badge */}
                     <div className={`flex flex-col items-end`}>
                          <div className={`px-2 py-0.5 rounded-full ${sleepRating.bg} border border-white/5`}>
                              <span className={`text-xs font-bold ${sleepRating.color}`}>{sleepRating.label}</span>
@@ -230,21 +250,18 @@ const DashboardScreen: React.FC = () => {
             </GlassCard>
         </div>
       ) : (
-        /* Timeline View */
         <div className="px-6 pt-4 relative">
              <div className="absolute left-[47px] top-4 bottom-0 w-[2px] bg-gradient-to-b from-white/10 via-white/10 to-transparent" />
              
              <div className="space-y-8">
-                {entries.map((entry, idx) => {
+                {entries.map((entry) => {
                     const moodDef = MOODS.find(m => m.type === entry.mood) || MOODS[2];
                     const isToday = new Date(entry.date).toDateString() === new Date().toDateString();
                     
                     return (
                         <div key={entry.id} className="relative flex items-center group">
-                            {/* Dot on timeline */}
                             <div className={`absolute -left-[3px] w-[8px] h-[8px] rounded-full border-2 border-dark-bg z-10 ${isToday ? 'bg-white w-[12px] h-[12px] -left-[5px] shadow-[0_0_10px_white]' : 'bg-slate-600'}`}></div>
                             
-                            {/* Time */}
                             <div className="flex flex-col w-12 mr-6 text-right shrink-0">
                                 <span className={`text-sm font-bold ${isToday ? 'text-white' : 'text-slate-400'}`}>
                                     {isToday ? 'Today' : new Date(entry.date).toLocaleDateString('en-US', { day: 'numeric', month: 'short' })}
@@ -254,7 +271,6 @@ const DashboardScreen: React.FC = () => {
                                 </span>
                             </div>
 
-                            {/* Card */}
                             <GlassCard 
                                 onClick={() => handleOpenEntry(entry)}
                                 className="flex-1 p-4 flex flex-col gap-3 hover:bg-white/10 active:scale-98 transition-all cursor-pointer border-white/5 bg-dark-card/40 relative overflow-hidden"
@@ -274,8 +290,6 @@ const DashboardScreen: React.FC = () => {
                                              <span>Sleep: {entry.sleep}h</span>
                                         </div>
                                     </div>
-                                    
-                                    {/* Edit Hint Icon (Visible on Hover/Always subtle) */}
                                     <div className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity">
                                         <Edit3 size={16} className="text-white/40" />
                                     </div>
@@ -294,8 +308,6 @@ const DashboardScreen: React.FC = () => {
                                         })}
                                     </div>
                                 )}
-                                
-                                {/* Note Preview */}
                                 {entry.note && (
                                     <div className="mt-2 pl-14 flex items-start gap-2">
                                         <FileText size={12} className="text-white/40 mt-[2px] shrink-0" />
@@ -309,6 +321,85 @@ const DashboardScreen: React.FC = () => {
              </div>
         </div>
       )}
+
+      {/* Journal Management Modal */}
+      <AnimatePresence>
+        {showSettings && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
+            onClick={() => setShowSettings(false)}
+          >
+            <motion.div 
+              initial={{ scale: 0.9, y: 20, opacity: 0 }}
+              animate={{ scale: 1, y: 0, opacity: 1 }}
+              exit={{ scale: 0.9, y: 20, opacity: 0 }}
+              onClick={e => e.stopPropagation()}
+              className="w-full max-w-sm bg-[#1a2632] border border-white/10 rounded-3xl p-6 shadow-2xl"
+            >
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl font-bold text-white">Manage Journal</h3>
+                <button onClick={() => setShowSettings(false)} className="p-2 hover:bg-white/5 rounded-full">
+                  <X size={20} className="text-white/70" />
+                </button>
+              </div>
+
+              <div className="space-y-6">
+                {/* Delete Range */}
+                <div className="space-y-3">
+                  <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Delete by Range</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="space-y-1">
+                      <label className="text-[10px] text-slate-400 ml-1">Start Date</label>
+                      <input 
+                        type="date" 
+                        value={startDate}
+                        onChange={(e) => setStartDate(e.target.value)}
+                        className="w-full bg-black/20 border border-white/10 rounded-xl p-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-purple-500/50"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] text-slate-400 ml-1">End Date</label>
+                      <input 
+                        type="date" 
+                        value={endDate}
+                        onChange={(e) => setEndDate(e.target.value)}
+                        className="w-full bg-black/20 border border-white/10 rounded-xl p-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-purple-500/50"
+                      />
+                    </div>
+                  </div>
+                  <button 
+                    onClick={handleDeleteRange}
+                    className="w-full py-3 bg-white/5 hover:bg-red-500/20 border border-white/10 hover:border-red-500/30 rounded-xl text-sm font-medium text-white transition-all flex items-center justify-center gap-2"
+                  >
+                    <Calendar size={16} />
+                    Delete Range
+                  </button>
+                </div>
+
+                <div className="h-px bg-white/5" />
+
+                {/* Clear All */}
+                <div className="space-y-3">
+                  <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Danger Zone</p>
+                  <button 
+                    onClick={() => {
+                      clearAllEntries();
+                      setShowSettings(false);
+                    }}
+                    className="w-full py-3 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 rounded-xl text-sm font-bold text-red-400 transition-all flex items-center justify-center gap-2"
+                  >
+                    <Trash2 size={16} />
+                    Clear Entire Journal
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Note Edit Modal */}
       <AnimatePresence>
@@ -327,10 +418,8 @@ const DashboardScreen: React.FC = () => {
                     onClick={e => e.stopPropagation()}
                     className="w-full max-w-sm bg-[#1a2632] border border-white/10 rounded-3xl p-6 shadow-2xl overflow-hidden relative"
                 >
-                    {/* Background blob for style */}
                     <div className="absolute top-[-50px] right-[-50px] w-32 h-32 bg-purple-500/20 rounded-full blur-3xl pointer-events-none" />
 
-                    {/* Header */}
                     <div className="flex justify-between items-center mb-6">
                         <div>
                             <h3 className="text-xl font-bold text-white">Journal</h3>
@@ -346,7 +435,6 @@ const DashboardScreen: React.FC = () => {
                         </button>
                     </div>
 
-                    {/* Mood Context */}
                     <div className="flex items-center gap-3 mb-6 p-3 bg-white/5 rounded-2xl border border-white/5">
                         <div 
                             className="w-10 h-10 rounded-full shadow-lg"
@@ -364,7 +452,6 @@ const DashboardScreen: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* Note Input */}
                     <div className="mb-6 relative">
                         <textarea
                             value={noteInput}
@@ -375,7 +462,6 @@ const DashboardScreen: React.FC = () => {
                         <FileText className="absolute bottom-4 right-4 text-white/10 pointer-events-none" size={48} />
                     </div>
 
-                    {/* Save Button */}
                     <button
                         onClick={handleSaveNote}
                         className="w-full py-3 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl font-bold text-sm shadow-lg shadow-purple-900/20 hover:shadow-purple-900/40 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
@@ -383,7 +469,6 @@ const DashboardScreen: React.FC = () => {
                         <Check size={18} />
                         Save Note
                     </button>
-
                 </motion.div>
             </motion.div>
         )}
