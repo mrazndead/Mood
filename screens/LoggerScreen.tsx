@@ -107,8 +107,8 @@ const LoggerScreen: React.FC<LoggerScreenProps> = ({ onLogComplete }) => {
             </button>
         </div>
 
-        {/* Quick Actions */}
-        <div className="w-full grid grid-cols-3 gap-4">
+        {/* Quick Actions - Moved up by 10px using mb-2.5 (10px) */}
+        <div className="w-full grid grid-cols-3 gap-4 mb-2.5">
             <button 
                 onClick={() => setActiveModal('activity')}
                 className="flex flex-col items-center gap-2 p-4 rounded-3xl bg-white/10 hover:bg-white/20 transition-all text-white"
