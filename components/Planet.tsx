@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Rocket } from 'lucide-react';
 import { MoodDefinition } from '../types';
 
 interface PlanetProps {
@@ -26,9 +27,28 @@ const Planet: React.FC<PlanetProps> = ({ mood, isAnimating = true }) => {
         transition={{ duration: 0.8 }}
       />
 
+      {/* Orbital Path for Spaceship */}
+      <motion.div
+        className="absolute w-[115%] h-[115%] pointer-events-none z-20"
+        animate={{ rotate: 360 }}
+        transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+      >
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2">
+          <motion.div
+            animate={{ 
+              y: [0, -3, 0],
+              opacity: [0.4, 0.7, 0.4]
+            }}
+            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <Rocket size={14} className="text-white/40 -rotate-45" />
+          </motion.div>
+        </div>
+      </motion.div>
+
       {/* The Planet Body */}
       <motion.div
-        className="w-full h-full rounded-full relative overflow-hidden shadow-[inset_-40px_-40px_80px_rgba(0,0,0,0.4),inset_20px_20px_40px_rgba(255,255,255,0.2),0_20px_40px_rgba(0,0,0,0.3)] cursor-pointer"
+        className="w-full h-full rounded-full relative overflow-hidden shadow-[inset_-40px_-40px_80px_rgba(0,0,0,0.4),inset_20px_20px_40px_rgba(255,255,255,0.2),0_20px_40px_rgba(0,0,0,0.3)] cursor-pointer z-10"
         animate={{ 
             backgroundColor: mood.planetColor,
             y: isAnimating ? [0, -12, 0] : 0
@@ -98,7 +118,7 @@ const Planet: React.FC<PlanetProps> = ({ mood, isAnimating = true }) => {
         <motion.div 
             initial={{ opacity: 0, rotate: -20, scale: 0.8 }}
             animate={{ opacity: 1, rotate: -20, scale: 1.1 }}
-            className="absolute w-[120%] h-12 border-[10px] border-white/20 rounded-[100%] pointer-events-none blur-[1px]"
+            className="absolute w-[120%] h-12 border-[10px] border-white/20 rounded-[100%] pointer-events-none blur-[1px] z-0"
         />
       )}
     </div>
