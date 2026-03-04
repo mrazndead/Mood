@@ -28,7 +28,7 @@ const Planet: React.FC<PlanetProps> = ({ mood, isAnimating = true }) => {
 
       {/* The Planet Body */}
       <motion.div
-        className="w-full h-full rounded-full relative overflow-hidden shadow-[inset_-25px_-25px_60px_rgba(0,0,0,0.2),0_20px_40px_rgba(0,0,0,0.15)] cursor-pointer"
+        className="w-full h-full rounded-full relative overflow-hidden shadow-[inset_-40px_-40px_80px_rgba(0,0,0,0.4),inset_20px_20px_40px_rgba(255,255,255,0.2),0_20px_40px_rgba(0,0,0,0.3)] cursor-pointer"
         animate={{ 
             backgroundColor: mood.planetColor,
             y: isAnimating ? [0, -12, 0] : 0
@@ -40,16 +40,26 @@ const Planet: React.FC<PlanetProps> = ({ mood, isAnimating = true }) => {
         onPointerDown={handlePointerDown}
         whileTap={{ scale: 0.97 }}
       >
-        {/* Texture/Craters - Dynamic based on mood type */}
-        <div className="absolute inset-0 opacity-30">
-            <div className="absolute w-20 h-20 bg-black/10 rounded-full top-10 left-12 blur-[2px]" />
-            <div className="absolute w-12 h-12 bg-black/10 rounded-full top-36 left-6 blur-[1px]" />
-            <div className="absolute w-24 h-24 bg-black/5 rounded-full bottom-10 right-10 blur-[3px]" />
-            <div className="absolute w-8 h-8 bg-white/20 rounded-full top-20 right-20 blur-[1px]" />
+        {/* Texture/Craters */}
+        <div className="absolute inset-0 opacity-40">
+            {/* Large Craters */}
+            <div className="absolute w-20 h-20 bg-black/15 rounded-full top-10 left-12 blur-[2px] shadow-inner" />
+            <div className="absolute w-24 h-24 bg-black/10 rounded-full bottom-12 right-14 blur-[3px] shadow-inner" />
+            
+            {/* Medium Craters */}
+            <div className="absolute w-12 h-12 bg-black/15 rounded-full top-36 left-6 blur-[1px]" />
+            <div className="absolute w-10 h-10 bg-white/10 rounded-full top-24 right-16 blur-[1px]" />
+            <div className="absolute w-14 h-14 bg-black/10 rounded-full bottom-24 left-24 blur-[2px]" />
+            
+            {/* Small Craters/Details */}
+            <div className="absolute w-6 h-6 bg-black/20 rounded-full top-16 right-32 blur-[1px]" />
+            <div className="absolute w-4 h-4 bg-white/20 rounded-full top-48 right-12 blur-[0.5px]" />
+            <div className="absolute w-8 h-8 bg-black/15 rounded-full bottom-8 left-40 blur-[1px]" />
+            <div className="absolute w-5 h-5 bg-black/10 rounded-full top-8 right-8 blur-[1px]" />
             
             {/* Swirl patterns for some moods */}
             {['Great', 'Okay', 'Low'].includes(mood.type) && (
-                <div className="absolute inset-0 border-[15px] border-white/10 rounded-full scale-110 -translate-x-10 translate-y-10 blur-sm" />
+                <div className="absolute inset-0 border-[20px] border-white/5 rounded-full scale-110 -translate-x-12 translate-y-12 blur-md" />
             )}
         </div>
         
@@ -77,10 +87,13 @@ const Planet: React.FC<PlanetProps> = ({ mood, isAnimating = true }) => {
         </AnimatePresence>
 
         {/* Shine/Atmosphere */}
-        <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-white/25 rounded-full pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-white/30 rounded-full pointer-events-none" />
+        
+        {/* Deep Shadow Overlay for 3D effect */}
+        <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-black/40 rounded-full pointer-events-none" />
       </motion.div>
 
-      {/* Rings for specific moods like in the design */}
+      {/* Rings for specific moods */}
       {mood.type === 'Okay' && (
         <motion.div 
             initial={{ opacity: 0, rotate: -20, scale: 0.8 }}
