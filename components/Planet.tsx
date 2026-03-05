@@ -34,6 +34,10 @@ const Planet: React.FC<PlanetProps> = ({ mood, isAnimating = true }) => {
       <div className="absolute bottom-16 right-20 w-32 h-32 rounded-full border border-white/5 blur-[1px] pointer-events-none" />
       <div className="absolute top-1/2 left-1/4 w-20 h-20 rounded-full border border-white/5 blur-[1px] pointer-events-none" />
       <div className="absolute bottom-1/3 right-1/3 w-24 h-24 rounded-full border border-white/5 blur-[1px] pointer-events-none" />
+      <div className="absolute -top-8 -right-8 w-16 h-16 rounded-full border border-white/5 blur-[1px] pointer-events-none" />
+      <div className="absolute -bottom-4 -left-4 w-12 h-12 rounded-full border border-white/5 blur-[1px] pointer-events-none" />
+      <div className="absolute top-20 left-20 w-8 h-8 rounded-full border border-white/5 blur-[1px] pointer-events-none" />
+      <div className="absolute bottom-20 right-24 w-10 h-10 rounded-full border border-white/5 blur-[1px] pointer-events-none" />
 
       {/* Orbital Path for Spaceship */}
       <motion.div
