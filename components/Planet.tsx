@@ -27,6 +27,12 @@ const Planet: React.FC<PlanetProps> = ({ mood, isAnimating = true }) => {
         transition={{ duration: 0.8 }}
       />
 
+      {/* Planet Silhouettes - subtle background elements */}
+      <div className="absolute -top-8 -left-8 w-32 h-32 rounded-full bg-[#8B5CF6]/10 blur-lg pointer-events-none" />
+      <div className="absolute -bottom-12 -right-12 w-28 h-28 rounded-full bg-[#F59E0B]/10 blur-lg pointer-events-none" />
+      <div className="absolute top-10 left-10 w-20 h-20 rounded-full bg-[#10B981]/10 blur-lg pointer-events-none" />
+      <div className="absolute bottom-10 right-14 w-24 h-24 rounded-full bg-[#EF4444]/15 blur-lg pointer-events-none" />
+
       {/* Orbital Path for Spaceship */}
       <motion.div
         className="absolute w-[115%] h-[115%] pointer-events-none z-20"
