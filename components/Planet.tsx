@@ -27,11 +27,13 @@ const Planet: React.FC<PlanetProps> = ({ mood, isAnimating = true }) => {
         transition={{ duration: 0.8 }}
       />
 
-      {/* Planet Silhouettes - subtle background elements */}
-      <div className="absolute -top-8 -left-8 w-32 h-32 rounded-full bg-[#8B5CF6]/10 blur-lg pointer-events-none" />
-      <div className="absolute -bottom-12 -right-12 w-28 h-28 rounded-full bg-[#F59E0B]/10 blur-lg pointer-events-none" />
-      <div className="absolute top-10 left-10 w-20 h-20 rounded-full bg-[#10B981]/10 blur-lg pointer-events-none" />
-      <div className="absolute bottom-10 right-14 w-24 h-24 rounded-full bg-[#EF4444]/15 blur-lg pointer-events-none" />
+      {/* Circle Outlines - subtle background elements */}
+      <div className="absolute -top-4 -left-4 w-40 h-40 rounded-full border border-white/5 blur-[1px] pointer-events-none" />
+      <div className="absolute -bottom-8 -right-8 w-36 h-36 rounded-full border border-white/5 blur-[1px] pointer-events-none" />
+      <div className="absolute top-16 left-16 w-28 h-28 rounded-full border border-white/5 blur-[1px] pointer-events-none" />
+      <div className="absolute bottom-16 right-20 w-32 h-32 rounded-full border border-white/5 blur-[1px] pointer-events-none" />
+      <div className="absolute top-1/2 left-1/4 w-20 h-20 rounded-full border border-white/5 blur-[1px] pointer-events-none" />
+      <div className="absolute bottom-1/3 right-1/3 w-24 h-24 rounded-full border border-white/5 blur-[1px] pointer-events-none" />
 
       {/* Orbital Path for Spaceship */}
       <motion.div
