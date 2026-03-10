@@ -8,6 +8,7 @@ import {
 import { MOODS, ACTIVITIES } from '../constants';
 import { useMood } from '../context/MoodContext';
 import Planet from '../components/Planet';
+import ShootingStars from '../components/ShootingStars';
 
 interface LoggerScreenProps {
   onLogComplete: () => void;
@@ -46,8 +47,11 @@ const LoggerScreen: React.FC<LoggerScreenProps> = ({ onLogComplete }) => {
 
   return (
     <div className="h-full flex flex-col relative z-10 pb-24 transition-colors duration-700" style={{ backgroundColor: currentMood.color }}>
+      {/* Background Animations */}
+      <ShootingStars />
+      
       {/* Top Navigation/Status Bar */}
-      <header className="pt-12 px-8 flex justify-between items-center text-white/80">
+      <header className="pt-12 px-8 flex justify-between items-center text-white/80 relative z-10">
         <div className="flex items-center gap-4">
             <div className="flex flex-col">
                 <div className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest opacity-60 mb-1">
@@ -75,7 +79,7 @@ const LoggerScreen: React.FC<LoggerScreenProps> = ({ onLogComplete }) => {
       </header>
 
       {/* Main Content */}
-      <main className="flex-grow flex flex-col items-center justify-center px-8">
+      <main className="flex-grow flex flex-col items-center justify-center px-8 relative z-10">
         <motion.div 
             key={currentMood.type}
             initial={{ opacity: 0, y: 10 }}
