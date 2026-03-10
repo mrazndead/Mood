@@ -48,10 +48,10 @@ const ShootingStar: React.FC<CelestialObjectProps> = ({ id, onComplete }) => {
 
 const Meteor: React.FC<CelestialObjectProps> = ({ id, onComplete }) => {
   const [config] = useState(() => ({
-    startX: Math.random() * 100,
-    startY: -10,
-    endX: Math.random() * 100 - 50, // Moves diagonally
-    duration: 3 + Math.random() * 4,
+    startX: -20,
+    startY: 10 + Math.random() * 50,
+    endY: (10 + Math.random() * 50) + (Math.random() * 10 - 5), // Slight diagonal drift
+    duration: 6 + Math.random() * 4,
     size: 2 + Math.random() * 2,
   }));
 
@@ -64,9 +64,9 @@ const Meteor: React.FC<CelestialObjectProps> = ({ id, onComplete }) => {
         scale: 0.5
       }}
       animate={{ 
-        left: `${config.startX + config.endX}%`, 
-        top: '110%', 
-        opacity: [0, 0.4, 0.4, 0],
+        left: '120%', 
+        top: `${config.endY}%`, 
+        opacity: [0, 0.3, 0.3, 0],
         scale: [0.5, 1, 1, 0.5],
       }}
       transition={{ 
@@ -74,10 +74,11 @@ const Meteor: React.FC<CelestialObjectProps> = ({ id, onComplete }) => {
         ease: "linear" 
       }}
       onAnimationComplete={() => onComplete(id)}
-      className="absolute bg-white/20 rounded-full blur-[1px] z-0"
+      className="absolute bg-white/10 rounded-full blur-[1px] z-0"
       style={{ width: config.size, height: config.size }}
     >
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[2px] h-[100px] bg-gradient-to-t from-white/10 to-transparent origin-bottom" />
+      {/* Horizontal trail */}
+      <div className="absolute top-1/2 right-0 -translate-y-1/2 w-[150px] h-[1px] bg-gradient-to-l from-white/5 to-transparent origin-right" />
     </motion.div>
   );
 };
@@ -88,13 +89,15 @@ const ShootingStars: React.FC = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       const rand = Math.random();
-      if (rand > 0.4) { // Increased frequency
+      // Decreased shooting star spawn rate by 40% (from 0.6 to 0.36 chance)
+      if (rand > 0.64) { 
         setStars(prev => [...prev, { id: Date.now(), type: 'star' }]);
       }
-      if (rand > 0.85) { // Occasional meteors
+      // Occasional meteors
+      if (rand > 0.92) { 
         setStars(prev => [...prev, { id: Date.now() + 1, type: 'meteor' }]);
       }
-    }, 1500); // Faster spawn rate
+    }, 1500);
     return () => clearInterval(interval);
   }, []);
 
