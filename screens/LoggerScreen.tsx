@@ -9,6 +9,7 @@ import { MOODS, ACTIVITIES } from '../constants';
 import { useMood } from '../context/MoodContext';
 import Planet from '../components/Planet';
 import ShootingStars from '../components/ShootingStars';
+import SpaceBackground from '../components/SpaceBackground';
 
 interface LoggerScreenProps {
   onLogComplete: () => void;
@@ -48,6 +49,7 @@ const LoggerScreen: React.FC<LoggerScreenProps> = ({ onLogComplete }) => {
   return (
     <div className="h-full flex flex-col relative z-10 pb-24 transition-colors duration-700" style={{ backgroundColor: currentMood.color }}>
       {/* Background Animations */}
+      <SpaceBackground />
       <ShootingStars />
       
       {/* Top Navigation/Status Bar */}
